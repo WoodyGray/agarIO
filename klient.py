@@ -1,0 +1,107 @@
+import socket
+import pygame
+import random
+
+
+W_WINDOW, H_WINDOW = 1000, 800
+colours = {'0': (255, 255, 0), '1': (255, 0, 0), '2': (0, 255, 0), '3': (0, 255, 255), '4': (128, 0, 128)}
+my_name = 'заблудшая_душа'
+
+def draw_opponents(enemy_list):
+    for i in range(len(enemy_list)):
+        j = enemy_list[i].split()
+
+        x = W_WINDOW//2 + int(j[0])
+        y = H_WINDOW // 2 + int(j[1])
+        r = int(j[2])
+        c = colours[j[3]]
+        pygame.draw.circle(screen, c, (x, y), r)
+
+def find(s):
+    otkr = None
+    for i in range(len(s)):
+        if s[i] == '<':
+            otkr = i
+        if s[i] == '>' and otkr is not None:
+            zakr = i
+            res = s[otkr+1:zakr]
+            return res
+    return ''
+
+class Me():
+    def __init__(self, data):
+        data = data.split()
+        self.r = int(data[0])
+        self.colour = data[1]
+
+    def update(self, new_r):
+        self.r = new_r
+
+    def draw(self):
+        if self.r != 0:
+            pygame.draw.circle(screen, colours[self.colour],
+                               (W_WINDOW // 2, H_WINDOW // 2), self.r)
+
+
+
+
+#подрубаем сервак
+klient_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+klient_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+klient_socket.connect(('localhost', 10000))
+
+# отправляем свой ник и размеры окна
+klient_socket.send(('.' + my_name + ' ' + str(W_WINDOW) + ' ' + str(H_WINDOW) + '.').encode())
+
+#получаемсвой размер и цвет
+data = klient_socket.recv(64).decode()
+
+#подтверждаем получение
+klient_socket.send('!'.encode())
+
+me = Me(data)
+
+#создание поля игры
+pygame.init()
+screen = pygame.display.set_mode((W_WINDOW, H_WINDOW))
+pygame.display.set_caption('заблудшие гавнарики')
+
+old_vector = (0, 0)
+vector = (0, 0)
+run_usl = True
+while run_usl:
+    #обработка событий
+    for even in pygame.event.get():
+        if even.type == pygame.QUIT:
+            run_usl = False
+    #считаем положение мыши
+    if pygame.mouse.get_focused():
+        pos = pygame.mouse.get_pos()
+        vector = (pos[0] - (W_WINDOW // 2), pos[1] - (H_WINDOW // 2))
+
+        if vector[0]**2 + vector[1]**2 <= me.r**2:
+            vector = (0, 0)
+
+    #отправляем вектор направления если он поменялся
+    if vector != old_vector:
+        old_vector = vector
+        message = '<' + str(vector[0]) + ',' + str(vector[1]) + '>'
+        klient_socket.send(message.encode())
+
+    #получаем новое состояние поля
+    infor = klient_socket.recv(2048 + 512 + 128 + 64)
+    infor = infor.decode()
+    infor = find(infor)
+    infor = infor.split(',')
+
+    #рисуем новое сотояние поля
+    screen.fill('gray25')
+
+    if infor != ['']:
+        me.update(int(infor[0]))
+        draw_opponents(infor[1:])
+        me.draw()
+
+
+    pygame.display.update()
+pygame.quit()
