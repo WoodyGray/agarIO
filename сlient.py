@@ -89,7 +89,7 @@ while run_usl:
         klient_socket.send(message.encode())
 
     #получаем новое состояние поля
-    infor = klient_socket.recv(2048 + 512 + 128 + 64)
+    infor = klient_socket.recv(2752)
     infor = infor.decode()
     infor = find(infor)
     infor = infor.split(',')

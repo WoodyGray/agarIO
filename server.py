@@ -2,7 +2,7 @@ import socket
 import pygame
 import random
 
-FPS = 100
+FPS = 200
 W_WINDOW, H_WINDOW = 4000, 4000
 W_SERV_WINDOW, H_SERV_WINDOW = 300, 300
 EAT_SIZE = 15
