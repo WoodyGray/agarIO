@@ -3,9 +3,10 @@ import pygame
 import random
 
 
-W_WINDOW, H_WINDOW = 1000, 800
+W_WINDOW, H_WINDOW = 600, 600
 colours = {'0': (255, 255, 0), '1': (255, 0, 0), '2': (0, 255, 0), '3': (0, 255, 255), '4': (128, 0, 128)}
 my_name = 'заблудшая_душа'
+grid_colour = (150, 150, 150)
 
 def draw_opponents(enemy_list):
     for i in range(len(enemy_list)):
@@ -42,8 +43,35 @@ class Me():
             pygame.draw.circle(screen, colours[self.colour],
                                (W_WINDOW // 2, H_WINDOW // 2), self.r)
 
+class Grid():
+    def __init__(self, screen):
+        self.screen = screen
+        self.x = 0
+        self.y = 0
+        self.start_size = 200
+        self.size = self.start_size
+
+    def update(self):
+        pass
+
+    def draw(self):
+        for i in range(W_WINDOW//self.size + 2):
+            pygame.draw.line(self.screen, grid_colour,
+                             [self.x + i*self.size, 0],#координаты верхнего конца
+                             [self.x + i*self.size, H_WINDOW],#координаты нижнего конца
+                             1)
+        for i in range(H_WINDOW//self.size + 2):
+            pygame.draw.line(self.screen, grid_colour,
+                             [self.y + i*self.size, 0],#координаты верхнего конца
+                             [self.y + i*self.size, W_WINDOW],#координаты нижнего конца
+                             1)
 
 
+
+#создание поля игры
+pygame.init()
+screen = pygame.display.set_mode((W_WINDOW, H_WINDOW))
+pygame.display.set_caption('заблудшие гавнарики')
 
 #подрубаем сервак
 klient_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -60,11 +88,7 @@ data = klient_socket.recv(64).decode()
 klient_socket.send('!'.encode())
 
 me = Me(data)
-
-#создание поля игры
-pygame.init()
-screen = pygame.display.set_mode((W_WINDOW, H_WINDOW))
-pygame.display.set_caption('заблудшие гавнарики')
+grid = Grid(screen)
 
 old_vector = (0, 0)
 vector = (0, 0)
@@ -94,11 +118,13 @@ while run_usl:
     infor = find(infor)
     infor = infor.split(',')
 
-    #рисуем новое сотояние поля
-    screen.fill('gray25')
-
+    #обработка сообщения сервера
     if infor != ['']:
         me.update(int(infor[0]))
+        grid.update()
+        # рисуем новое сотояние поля
+        screen.fill('gray25')
+        grid.draw()
         draw_opponents(infor[1:])
         me.draw()
 

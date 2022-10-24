@@ -60,12 +60,12 @@ class Playr():
     def set_options(self, data):
         data = data[1:-1].split(' ')
         self.name = data[0]
-        print(data)
-
         self.w_window = int(data[1])
         self.h_window = int(data[2])
         self.w_vision = int(data[1])
         self.h_vision = int(data[2])
+        print(self.name, self.w_window, self.h_window)
+
     def change_speed(self, v):
         if v[0] == 0 and v[1] == 0:
             self.speed_x = 0
