@@ -51,8 +51,10 @@ class Grid():
         self.start_size = 200
         self.size = self.start_size
 
-    def update(self):
-        pass
+    def update(self, r_x, r_y, L):
+        self.size = self.start_size//L
+        self.x = -self.size + (-r_x) % self.size
+        self.y = -self.size + (-r_y) % self.size
 
     def draw(self):
         for i in range(W_WINDOW//self.size + 2):
@@ -62,8 +64,8 @@ class Grid():
                              1)
         for i in range(H_WINDOW//self.size + 2):
             pygame.draw.line(self.screen, grid_colour,
-                             [self.y + i*self.size, 0],#координаты верхнего конца
-                             [self.y + i*self.size, W_WINDOW],#координаты нижнего конца
+                             [0, self.y + i*self.size],#координаты верхнего конца
+                             [W_WINDOW, self.y + i*self.size],#координаты нижнего конца
                              1)
 
 
@@ -120,8 +122,9 @@ while run_usl:
 
     #обработка сообщения сервера
     if infor != ['']:
-        me.update(int(infor[0]))
-        grid.update()
+        parametrs = list(map(int, infor[0].split(' ')))
+        me.update(parametrs[0])
+        grid.update(parametrs[1], parametrs[2], parametrs[3])
         # рисуем новое сотояние поля
         screen.fill('gray25')
         grid.draw()

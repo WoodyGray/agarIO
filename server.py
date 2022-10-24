@@ -287,7 +287,10 @@ while run_usl:
     answers = ['' for i in range(len(players))]
     for i in range(len(players)):
         r_ = str(round(players[i].r//players[i].L))
-        visible_balls[i] = [r_] + visible_balls[i]
+        x_ = str(round(players[i].x//players[i].L))
+        y_ = str(round(players[i].y//players[i].L))
+        L_ = str(players[i].L)
+        visible_balls[i] = [r_+' '+x_+' '+y_+' '+L_] + visible_balls[i]
         answers[i] = '<' + (','.join(visible_balls[i])) + '>'
 
 
