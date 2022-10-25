@@ -29,6 +29,11 @@ def find(s):
             return res
     return ''
 
+def write_name(x, y, r, name):
+    font = pygame.font.Font(None, r)
+    text = font.render(name, True, (0, 0, 0))
+
+
 class Me():
     def __init__(self, data):
         data = data.split()

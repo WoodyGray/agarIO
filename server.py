@@ -258,8 +258,12 @@ while run_usl:
                     y_ = str(round(dist_y//players[i].L))
                     r_ = str(round(players[j].r//players[i].L))
                     c_ = players[j].colour
+                    n_ = players[j].name
 
-                    visible_balls[i].append(x_+' '+y_+' '+r_+' '+c_)
+                    if players[j].r >= 30*players[j].L:
+                        visible_balls[i].append(x_+' '+y_+' '+r_+' '+c_+' '+n_)
+                    else:
+                        visible_balls[i].append(x_ + ' ' + y_ + ' ' + r_ + ' ' + c_)
 
             # j видит i
             if (
@@ -280,8 +284,12 @@ while run_usl:
                     y_ = str(round(-dist_y//players[j].L))
                     r_ = str(round(players[i].r//players[j].L))
                     c_ = players[i].colour
+                    n_ = players[i].name
 
-                    visible_balls[j].append(x_ + ' ' + y_ + ' ' + r_ + ' ' + c_)
+                    if players[i].r >= 30 * players[j].L:
+                        visible_balls[j].append(x_ + ' ' + y_ + ' ' + r_ + ' ' + c_ + ' ' + n_)
+                    else:
+                        visible_balls[j].append(x_ + ' ' + y_ + ' ' + r_ + ' ' + c_)
 
     # формируем ответ каждому игроку
     answers = ['' for i in range(len(players))]
