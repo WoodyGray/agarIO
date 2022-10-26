@@ -5,7 +5,7 @@ import random
 
 W_WINDOW, H_WINDOW = 600, 600
 colours = {'0': (255, 255, 0), '1': (255, 0, 0), '2': (0, 255, 0), '3': (0, 255, 255), '4': (128, 0, 128)}
-my_name = 'заблудшая_душа'
+my_name = 'ЗАСОС'
 grid_colour = (150, 150, 150)
 
 def draw_opponents(enemy_list):
@@ -17,6 +17,8 @@ def draw_opponents(enemy_list):
         r = int(j[2])
         c = colours[j[3]]
         pygame.draw.circle(screen, c, (x, y), r)
+
+        if len(j) == 5 : write_name(x, y, r, j[4])
 
 def find(s):
     otkr = None
@@ -32,6 +34,8 @@ def find(s):
 def write_name(x, y, r, name):
     font = pygame.font.Font(None, r)
     text = font.render(name, True, (0, 0, 0))
+    rect = text.get_rect(center=(x, y))
+    screen.blit(text, rect)
 
 
 class Me():
@@ -47,6 +51,7 @@ class Me():
         if self.r != 0:
             pygame.draw.circle(screen, colours[self.colour],
                                (W_WINDOW // 2, H_WINDOW // 2), self.r)
+            write_name(W_WINDOW // 2, H_WINDOW // 2, self.r, my_name)
 
 class Grid():
     def __init__(self, screen):
@@ -120,7 +125,11 @@ while run_usl:
         klient_socket.send(message.encode())
 
     #получаем новое состояние поля
-    infor = klient_socket.recv(2752)
+    try:
+        infor = klient_socket.recv(2752)
+    except:
+        run_usl = False
+        continue
     infor = infor.decode()
     infor = find(infor)
     infor = infor.split(',')

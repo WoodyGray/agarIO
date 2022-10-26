@@ -2,7 +2,10 @@ import socket
 import pygame
 import random
 
-FPS = 200
+work_on_server = True
+serve_ip = 'localhost'
+serve_ip = '123.234.222.132'
+FPS = 100
 W_WINDOW, H_WINDOW = 4000, 4000
 W_SERV_WINDOW, H_SERV_WINDOW = 300, 300
 EAT_SIZE = 15
@@ -52,6 +55,7 @@ class Playr():
         self.h_vision = 800
 
         self.errors = 0
+        self.dead = 0
         self.ready = False
         self.abs_speed = 30/(self.r**0.5)
         self.speed_x = 0
@@ -64,7 +68,7 @@ class Playr():
         self.h_window = int(data[2])
         self.w_vision = int(data[1])
         self.h_vision = int(data[2])
-        print(self.name, self.w_window, self.h_window)
+        print(self.name)
 
     def change_speed(self, v):
         if v[0] == 0 and v[1] == 0:
@@ -101,7 +105,10 @@ class Playr():
                 self.y += self.speed_y
 
         # абсолютная скорость
-        self.abs_speed = 30/(self.r**0.5)
+        if self.r != 0:
+            self.abs_speed = 30/(self.r**0.5)
+        else:
+            self.abs_speed = 0
 
         # радиус
         if self.r >= 100:
@@ -123,13 +130,14 @@ class Playr():
 # настройка и создание сокета
 main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-main_socket.bind(('localhost', 10000))
+main_socket.bind((serve_ip, 10000))
 main_socket.setblocking(0)
 main_socket.listen(5)
 
 #создание граф окна сервера
 pygame.init()
-screen = pygame.display.set_mode((W_SERV_WINDOW, H_SERV_WINDOW))
+if not work_on_server:
+    screen = pygame.display.set_mode((W_SERV_WINDOW, H_SERV_WINDOW))
 clock = pygame.time.Clock()
 
 #создание стартового набора мобов
@@ -156,7 +164,7 @@ while run_usl:
         #проверка на пришедшие заблудшие души
         try:
             new_socket, addr = main_socket.accept()
-            print('Подключился', addr)
+            print('Подключился')
             new_socket.setblocking(0)
             spawn = random.choice(eats)
             new_playr = Playr(new_socket, addr,
@@ -314,7 +322,13 @@ while run_usl:
 
     # чистим список от откисших игроков
     for playr in players:
-        if playr.errors >= 100 or playr.r == 0:
+        if playr.r == 0:
+            if playr.conn is not None:
+                playr.dead += 1
+            else:
+                playr.dead += 300
+
+        if playr.errors >= 100 or playr.dead == 300:
             if playr.conn is not None:
                 playr.conn.close()
             players.remove(playr)
@@ -324,19 +338,20 @@ while run_usl:
         if eat.r == 0:
             eats.remove(eat)
 
-    # отрисовка игрового поля на сервере
-    for even in pygame.event.get():
-        if even.type == pygame.QUIT:
-            run_usl = False
+    if not work_on_server:
+        # отрисовка игрового поля на сервере
+        for even in pygame.event.get():
+            if even.type == pygame.QUIT:
+                run_usl = False
 
-    screen.fill('BLACK')
-    for playr in players:
-        x = round(playr.x * W_SERV_WINDOW / W_WINDOW)
-        y = round(playr.y * H_SERV_WINDOW / H_WINDOW)
-        r = round(playr.r * W_SERV_WINDOW / W_WINDOW)
-        c = colours[playr.colour]
-        pygame.draw.circle(screen, c, (x, y), r)
-    pygame.display.update()
+        screen.fill('BLACK')
+        for playr in players:
+            x = round(playr.x * W_SERV_WINDOW / W_WINDOW)
+            y = round(playr.y * H_SERV_WINDOW / H_WINDOW)
+            r = round(playr.r * W_SERV_WINDOW / W_WINDOW)
+            c = colours[playr.colour]
+            pygame.draw.circle(screen, c, (x, y), r)
+        pygame.display.update()
 
 pygame.quit()
 main_socket.close()
