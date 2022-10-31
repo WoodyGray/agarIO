@@ -126,7 +126,7 @@ while run_usl:
 
     #получаем новое состояние поля
     try:
-        infor = klient_socket.recv(2752)
+        infor = klient_socket.recv(2**13)
     except:
         run_usl = False
         continue
