@@ -4,7 +4,7 @@ import random
 
 work_on_server = True
 serve_ip = 'localhost'
-serve_ip = '123.234.222.132'
+#serve_ip = str(socket.gethostbyname(socket.gethostname()))
 FPS = 100
 W_WINDOW, H_WINDOW = 4000, 4000
 W_SERV_WINDOW, H_SERV_WINDOW = 300, 300

@@ -88,7 +88,7 @@ pygame.display.set_caption('заблудшие гавнарики')
 #подрубаем сервак
 klient_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 klient_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-klient_socket.connect(('localhost', 10000))
+klient_socket.connect(('172.18.4.10', 10000))
 
 # отправляем свой ник и размеры окна
 klient_socket.send(('.' + my_name + ' ' + str(W_WINDOW) + ' ' + str(H_WINDOW) + '.').encode())
